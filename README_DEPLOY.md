@@ -1,65 +1,48 @@
-# Deployment Guide - Zerostock
+# Deployment Guide - Zerostock (Docker Edition)
 
-Follow these steps to publish your Zerostock application to the web using **Render**.
+Follow these steps to publish your Zerostock application to the web using **Docker** on Render. This is the recommended method to avoid system library issues (like GLIBC errors).
 
 ## 1. Push Code to GitHub
-Ensure all your latest changes (including `package.json` updates) are pushed to your GitHub repository:
+Ensure your latest changes (including `Dockerfile` and `server.js` updates) are pushed to GitHub:
 ```bash
 git add .
-git commit -m "Prepare for deployment"
+git commit -m "Switch to Docker deployment and add error handling"
 git push origin main
 ```
 
-## 2. Create a Render Account
-1. Go to [Render.com](https://render.com/) and sign up (GitHub login is easiest).
-2. Once logged in, click **"New +"** and select **"Web Service"**.
+## 2. Configure Render for Docker
+If you have already created a "Web Service" on Render, you need to switch its runtime:
 
-## 3. Connect Your Repository
-1. Connect your GitHub account to Render if you haven't already.
-2. Search for your repository `Zerostock` and click **"Connect"**.
+1.  Go to your **Render Dashboard**.
+2.  Select your `zerostock` service.
+3.  Go to **Settings**.
+4.  Find **Runtime** and change it from `Node` to **`Docker`**.
+5.  Clear any manual **Build Command** or **Start Command** settings (Docker handles this automatically).
+6.  **Save Changes**.
 
-## 4. Configure the Web Service
-Set the following configurations on the Render dashboard:
+## 3. Deployment
+Render will automatically detect the `Dockerfile` and start building the container image. 
 
-- **Name**: `zerostock` (or any name you like)
-- **Region**: Select the one closest to you (e.g., Singapore or US East)
-- **Branch**: `main`
-- **Root Directory**: (Leave blank)
-- **Runtime**: `Node`
-- **Build Command**: `npm install --build-from-source sqlite3`
-- **Start Command**: `npm run start`
-- **Instance Type**: Select the **Free** tier.
+- This build might take a few minutes longer the first time because it's installing system dependencies and building `sqlite3` from source.
+- Once finished, you will see `Build Successful`.
 
-## 5. (Optional) Initialize Sample Data
-By default, the application will create a blank database on startup. If you want to populate it with the sample data provided in `seed.js`:
-
-1. Go to the **"Shell"** tab in your Render dashboard after the service is live.
-2. Run the following command:
+## 4. (Optional) Initialize Sample Data
+Once the container is running:
+1. Go to the **"Shell"** tab in your Render dashboard.
+2. Run:
    ```bash
    npm run seed
    ```
-3. Restart the service or refresh the page.
+3. Your data is now ready.
 
 > [!CAUTION]
-> On Render's **Free Tier**, the SQLite database file (`database.sqlite`) is **ephemeral**. This means it will be deleted every time the server restarts or you deploy new code. 
-> To keep your data permanently, you would need to use Render's **Persistent Disk** (which starts at $7/month) or switch to a cloud database like **MongoDB Atlas** or **Neon (PostgreSQL)**.
-
-# 6. Access Your App
-Once Render finishes building (`Build Successful`), you will see a URL at the top of the page (e.g., `https://zerostock.onrender.com`). Click it to see your live application!
+> On Render's **Free Tier**, the SQLite database file (`database.sqlite`) is **ephemeral**. This means it will be deleted every time the container restarts or you deploy new code. 
+> To keep your data permanently, use Render's **Persistent Disk** or switch to a cloud database (PostgreSQL/MongoDB).
 
 ## Troubleshooting
 
-### GLIBC Version Error
-If you see an error like `/lib/x86_64-linux-gnu/libm.so.6: version 'GLIBC_2.38' not found`, it means the pre-built `sqlite3` binary is incompatible with Render's older environment.
+### 'throw err' or Crashes
+I have added global error handlers to `server.js`. If the app crashes, check the **"Logs"** tab on Render. You will now see a detailed error message instead of an opaque `throw err` stack trace.
 
-**Solution:**
-Ensure your **Build Command** on the Render dashboard is exactly:
-```bash
-npm install --build-from-source sqlite3
-```
-This forces Render to compile the package specifically for its own system.
-
-### Environment Version
-If you have other compatibility issues, you can specify your local Node.js version by adding an **Environment Variable** in Render:
-- **Key**: `NODE_VERSION`
-- **Value**: `20.x` (or whatever version you use locally)
+### Connection Errors
+Ensure that your database connection in `src/db/connection.js` is using a path that the Docker container has access to (the default `./database.sqlite` works fine).
