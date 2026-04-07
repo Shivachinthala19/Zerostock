@@ -26,7 +26,7 @@ Set the following configurations on the Render dashboard:
 - **Branch**: `main`
 - **Root Directory**: (Leave blank)
 - **Runtime**: `Node`
-- **Build Command**: `npm install`
+- **Build Command**: `npm install --build-from-source sqlite3`
 - **Start Command**: `npm run start`
 - **Instance Type**: Select the **Free** tier.
 
@@ -44,5 +44,22 @@ By default, the application will create a blank database on startup. If you want
 > On Render's **Free Tier**, the SQLite database file (`database.sqlite`) is **ephemeral**. This means it will be deleted every time the server restarts or you deploy new code. 
 > To keep your data permanently, you would need to use Render's **Persistent Disk** (which starts at $7/month) or switch to a cloud database like **MongoDB Atlas** or **Neon (PostgreSQL)**.
 
-## 6. Access Your App
+# 6. Access Your App
 Once Render finishes building (`Build Successful`), you will see a URL at the top of the page (e.g., `https://zerostock.onrender.com`). Click it to see your live application!
+
+## Troubleshooting
+
+### GLIBC Version Error
+If you see an error like `/lib/x86_64-linux-gnu/libm.so.6: version 'GLIBC_2.38' not found`, it means the pre-built `sqlite3` binary is incompatible with Render's older environment.
+
+**Solution:**
+Ensure your **Build Command** on the Render dashboard is exactly:
+```bash
+npm install --build-from-source sqlite3
+```
+This forces Render to compile the package specifically for its own system.
+
+### Environment Version
+If you have other compatibility issues, you can specify your local Node.js version by adding an **Environment Variable** in Render:
+- **Key**: `NODE_VERSION`
+- **Value**: `20.x` (or whatever version you use locally)
