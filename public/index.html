@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroStock - Premium Inventory</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation / Quick Actions
+        <aside class="sidebar glass">
+            <div class="logo">
+                <i class="fas fa-boxes"></i>
+                <h2>ZeroStock</h2>
+            </div>
+
+            <nav class="main-nav">
+                <button class="nav-btn active" data-tab="search"><i class="fas fa-search"></i> Find Inventory</button>
+                <button class="nav-btn" data-tab="reports"><i class="fas fa-chart-pie"></i> Supplier Reports</button>
+            </nav>
+
+            <div class="quick-actions">
+                <h3>Quick Add</h3>
+                <button class="action-btn" id="openSupplierModalBtn"><i class="fas fa-plus"></i> Add Supplier</button>
+                <button class="action-btn" id="openInventoryModalBtn"><i class="fas fa-plus"></i> Add Inventory</button>
+            </div>
+        </aside> -->
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Search Tab -->
+            <section id="search-section" class="tab-content active">
+                <header class="section-header">
+                    <h1>Inventory Search</h1>
+                    <p>Find surplus products instantly across all suppliers.</p>
+                </header>
+
+                <div class="search-dashboard glass">
+                    <form id="search-form" class="filters-grid">
+                        <div class="filter-group">
+                            <label for="q">Product Name</label>
+                            <div class="input-icon">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="q" placeholder="E.g., Desk, Mouse...">
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label for="category">Category</label>
+                            <select id="category">
+                                <option value="">All Categories</option>
+                                <option value="Electronics">Electronics</option>
+                                <option value="Furniture">Furniture</option>
+                                <option value="Stationery">Stationery</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="minPrice">Min Price ($)</label>
+                            <input type="number" id="minPrice" placeholder="0">
+                        </div>
+                        <div class="filter-group">
+                            <label for="maxPrice">Max Price ($)</label>
+                            <input type="number" id="maxPrice" placeholder="1000">
+                        </div>
+                        <div class="filter-group btn-group">
+                            <button type="submit" class="primary-btn">Apply Filters</button>
+                            <button type="button" id="clear-filters" class="secondary-btn">Clear</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="results-container">
+                    <div id="loading-state" class="hidden">
+                        <div class="spinner"></div>
+                        <p>Searching inventory...</p>
+                    </div>
+                    <div id="no-results" class="hidden glass-alert">
+                        <i class="fas fa-inbox"></i>
+                        <h3>No results found</h3>
+                        <p>Try adjusting your search filters.</p>
+                    </div>
+                    <div id="error-alert" class="hidden text-danger"></div>
+                    <div class="grid-view" id="results-grid">
+                        <!-- Results dynamically injected here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Tab -->
+            <section id="reports-section" class="tab-content">
+                <header class="section-header">
+                    <h1>Supplier Reports</h1>
+                    <p>View total inventory value grouped by supplier.</p>
+                </header>
+
+                <div class="table-container glass">
+                    <table id="reports-table">
+                        <thead>
+                            <tr>
+                                <th>Supplier ID</th>
+                                <th>Supplier Name</th>
+                                <th>Total Inventory Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Report injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="supplierModal" class="modal">
+        <div class="modal-content glass">
+            <span class="close" data-modal="supplierModal">&times;</span>
+            <h2>Add New Supplier</h2>
+            <form id="supplier-form">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="supp-name" required>
+                </div>
+                <div class="form-group">
+                    <label>City</label>
+                    <input type="text" id="supp-city" required>
+                </div>
+                <button type="submit" class="primary-btn">Save Supplier</button>
+                <div id="supp-msg"></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="inventoryModal" class="modal">
+        <div class="modal-content glass">
+            <span class="close" data-modal="inventoryModal">&times;</span>
+            <h2>Add New Inventory</h2>
+            <form id="inventory-form">
+                <div class="form-group">
+                    <label>Supplier</label>
+                    <select id="inv-supplier" required>
+                        <!-- Options injected -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="inv-product" required>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="inv-category" required>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Furniture">Furniture</option>
+                        <option value="Stationery">Stationery</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" id="inv-qty" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Price ($)</label>
+                        <input type="number" id="inv-price" step="0.01" min="0.01" required>
+                    </div>
+                </div>
+                <button type="submit" class="primary-btn">Save Inventory</button>
+                <div id="inv-msg"></div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
